@@ -1,73 +1,68 @@
-import { Router } from 'express';
-import Anthropic from '@anthropic-ai/sdk';
+import { Router } from "express";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import {
   chatSystemPrompt,
   showMeSystemPrompt,
   diagnoseSystemPrompt,
-} from '../prompts.js';
+} from "../prompts.js";
 
 const router = Router();
-const client = new Anthropic();
-const MODEL = 'claude-sonnet-4-0';
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+const MODEL = "gemini-2.5-flash"; // Change to 'gemini-2.5-pro' if you want higher quality (slightly more expensive)
 
 const showMeSchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    title: { type: 'string' },
-    intro: { type: 'string' },
+    title: { type: "string" },
+    intro: { type: "string" },
     steps: {
-      type: 'array',
+      type: "array",
       items: {
-        type: 'object',
+        type: "object",
         properties: {
-          title: { type: 'string' },
-          body: { type: 'string' },
+          title: { type: "string" },
+          body: { type: "string" },
         },
-        required: ['title', 'body'],
+        required: ["title", "body"],
         additionalProperties: false,
       },
     },
-    done_message: { type: 'string' },
-    escalate: { type: 'boolean' },
+    done_message: { type: "string" },
+    escalate: { type: "boolean" },
   },
-  required: ['title', 'intro', 'steps', 'done_message', 'escalate'],
+  required: ["title", "intro", "steps", "done_message", "escalate"],
   additionalProperties: false,
 };
 
 const diagnoseSchema = {
-  type: 'object',
+  type: "object",
   properties: {
     overall_health: {
-      type: 'string',
-      enum: ['good', 'ok', 'attention', 'serious'],
+      type: "string",
+      enum: ["good", "ok", "attention", "serious"],
     },
-    summary: { type: 'string' },
+    summary: { type: "string" },
     findings: {
-      type: 'array',
+      type: "array",
       items: {
-        type: 'object',
+        type: "object",
         properties: {
-          area: { type: 'string' },
-          status: { type: 'string', enum: ['good', 'ok', 'warn', 'bad'] },
-          message: { type: 'string' },
+          area: { type: "string" },
+          status: { type: "string", enum: ["good", "ok", "warn", "bad"] },
+          message: { type: "string" },
         },
-        required: ['area', 'status', 'message'],
+        required: ["area", "status", "message"],
         additionalProperties: false,
       },
     },
-    top_tip: { type: 'string' },
-    escalate: { type: 'boolean' },
+    top_tip: { type: "string" },
+    escalate: { type: "boolean" },
   },
-  required: ['overall_health', 'summary', 'findings', 'top_tip', 'escalate'],
+  required: ["overall_health", "summary", "findings", "top_tip", "escalate"],
   additionalProperties: false,
 };
-
-function extractText(message) {
-  return message.content
-    .filter((b) => b.type === 'text')
-    .map((b) => b.text)
-    .join('');
-}
 
 function tryParseJson(text) {
   try {
@@ -85,73 +80,106 @@ function tryParseJson(text) {
   }
 }
 
-router.post('/', async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
-    const { messages = [], mode = 'chat', hardwareData = null } = req.body || {};
+    const {
+      messages = [],
+      mode = "chat",
+      hardwareData = null,
+    } = req.body || {};
 
     if (!Array.isArray(messages)) {
-      return res.status(400).json({ error: 'messages must be an array' });
+      return res.status(400).json({ error: "messages must be an array" });
     }
 
     const cleanMessages = messages
-      .filter((m) => m && typeof m.content === 'string' && m.content.trim())
+      .filter((m) => m && typeof m.content === "string" && m.content.trim())
       .map((m) => ({
-        role: m.role === 'assistant' ? 'assistant' : 'user',
+        role: m.role === "assistant" ? "assistant" : "user",
         content: m.content,
       }));
 
-    if (mode === 'chat') {
-      const response = await client.messages.create({
-        model: MODEL,
-        max_tokens: 1024,
-        system: chatSystemPrompt,
-        messages: cleanMessages,
-      });
-      return res.json({ mode, reply: extractText(response) });
-    }
+    // Convert to Gemini format (assistant → model)
+    const toGeminiHistory = (msgs) =>
+      msgs.map((m) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      }));
 
-    if (mode === 'showme') {
-      const response = await client.messages.create({
+    if (mode === "chat") {
+      const model = genAI.getGenerativeModel({
         model: MODEL,
-        max_tokens: 2048,
-        system: showMeSystemPrompt,
-        messages: cleanMessages,
-        output_config: {
-          format: {
-            type: 'json_schema',
-            schema: showMeSchema,
-          },
+        systemInstruction: chatSystemPrompt,
+        generationConfig: {
+          maxOutputTokens: 1024,
         },
       });
-      const text = extractText(response);
+
+      const history = toGeminiHistory(cleanMessages);
+      const result = await model.generateContent({ contents: history });
+
+      const reply = result.response.text();
+      return res.json({ mode, reply });
+    }
+
+    if (mode === "showme") {
+      const model = genAI.getGenerativeModel({
+        model: MODEL,
+        systemInstruction: showMeSystemPrompt,
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: showMeSchema,
+          maxOutputTokens: 2048,
+        },
+      });
+
+      const history = toGeminiHistory(cleanMessages);
+      const result = await model.generateContent({ contents: history });
+
+      const text = result.response.text();
       const parsed = tryParseJson(text);
+
       if (!parsed) {
-        return res.status(502).json({ error: 'Could not parse Show Me response', raw: text });
+        return res
+          .status(502)
+          .json({ error: "Could not parse Show Me response", raw: text });
       }
       return res.json({ mode, data: parsed });
     }
 
-    if (mode === 'diagnose') {
-      const userTurn = {
-        role: 'user',
-        content: `Here is the sanitized hardware data from the user's computer. Interpret it for a non-technical person and return the structured findings.\n\n${JSON.stringify(hardwareData ?? {}, null, 2)}`,
-      };
-      const response = await client.messages.create({
+    if (mode === "diagnose") {
+      const model = genAI.getGenerativeModel({
         model: MODEL,
-        max_tokens: 2048,
-        system: diagnoseSystemPrompt,
-        messages: [...cleanMessages, userTurn],
-        output_config: {
-          format: {
-            type: 'json_schema',
-            schema: diagnoseSchema,
-          },
+        systemInstruction: diagnoseSystemPrompt,
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: diagnoseSchema,
+          maxOutputTokens: 2048,
         },
       });
-      const text = extractText(response);
+
+      const history = toGeminiHistory(cleanMessages);
+
+      const userTurn = {
+        role: "user",
+        parts: [
+          {
+            text: `Here is the sanitized hardware data from the user's computer. Interpret it for a non-technical person and return the structured findings.\n\n${JSON.stringify(hardwareData ?? {}, null, 2)}`,
+          },
+        ],
+      };
+
+      const result = await model.generateContent({
+        contents: [...history, userTurn],
+      });
+
+      const text = result.response.text();
       const parsed = tryParseJson(text);
+
       if (!parsed) {
-        return res.status(502).json({ error: 'Could not parse Diagnose response', raw: text });
+        return res
+          .status(502)
+          .json({ error: "Could not parse Diagnose response", raw: text });
       }
       return res.json({ mode, data: parsed });
     }
