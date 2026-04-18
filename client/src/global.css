@@ -505,8 +505,9 @@ html.high-contrast .error {
 }
 
 /* Show Me mode */
-.showme-mode { display: flex; flex-direction: column; gap: 16px; flex: 1; }
-.showme-prompt { display: flex; flex-direction: column; gap: 12px; max-width: 560px; }
+.showme-mode { display: flex; flex-direction: column; gap: 16px; flex: 1; align-items: center; }
+.showme-prompt { display: flex; flex-direction: column; gap: 12px; max-width: 560px; width: 100%; margin: 0 auto; text-align: center; align-items: center; }
+.showme-prompt textarea { width: 100%; text-align: center; }
 .showme-label { font-weight: 700; font-size: 1.1em; color: var(--text); }
 .showme-prompt textarea {
   border: 2px solid #cccccc;

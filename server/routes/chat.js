@@ -109,7 +109,8 @@ router.post("/", async (req, res, next) => {
         generationConfig: {
           temperature: 0.3,
           topP: 0.8,
-          maxOutputTokens: 120,
+          maxOutputTokens: 200,
+          thinkingConfig: { thinkingBudget: 0 },
         },
       });
 
@@ -130,6 +131,7 @@ router.post("/", async (req, res, next) => {
           responseMimeType: "application/json",
           responseSchema: showMeSchema,
           maxOutputTokens: 2048,
+          thinkingConfig: { thinkingBudget: 0 },
         },
       });
 
@@ -157,6 +159,7 @@ router.post("/", async (req, res, next) => {
           responseMimeType: "application/json",
           responseSchema: diagnoseSchema,
           maxOutputTokens: 2048,
+          thinkingConfig: { thinkingBudget: 0 },
         },
       });
 
