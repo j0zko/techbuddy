@@ -107,7 +107,7 @@ export default function ChatMode({ lang }) {
               title={listening ? t(lang, 'listening') : t(lang, 'voice')}
               type="button"
             >
-              {listening ? '🔴' : '🎤'}
+              {listening ? '�' : '🎙️'}
             </button>
           )}
           <button

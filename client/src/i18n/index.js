@@ -9,7 +9,7 @@ export const LANGUAGES = [
 
 const dict = {
   en: {
-    appTitle: 'TechBuddy',
+    appTitle: 'AT&T Tech Support',
     tagline: "Friendly help for any computer trouble.",
     modeChat: 'Chat',
     modeShowMe: 'Show Me',
@@ -42,7 +42,7 @@ const dict = {
     highContrast: 'High contrast',
     language: 'Language',
     footer: 'Made to be patient. Never asks for passwords.',
-    typing: 'TechBuddy is typing…',
+    typing: 'AT&T Tech Support is typing…',
     error: 'Something went wrong. Please try again.',
     healthGood: 'Looking great',
     healthOk: 'All good',
@@ -51,7 +51,7 @@ const dict = {
     topTip: 'Top tip',
   },
   es: {
-    appTitle: 'TechBuddy',
+    appTitle: 'AT&T Tech Support',
     tagline: 'Ayuda amable para cualquier problema con la computadora.',
     modeChat: 'Chat',
     modeShowMe: 'Muéstrame',
@@ -84,7 +84,7 @@ const dict = {
     highContrast: 'Alto contraste',
     language: 'Idioma',
     footer: 'Hecho con paciencia. Nunca pide contraseñas.',
-    typing: 'TechBuddy está escribiendo…',
+    typing: 'AT&T Tech Support está escribiendo…',
     error: 'Algo salió mal. Inténtalo de nuevo.',
     healthGood: 'Se ve genial',
     healthOk: 'Todo bien',
@@ -93,7 +93,7 @@ const dict = {
     topTip: 'Mejor consejo',
   },
   fr: {
-    appTitle: 'TechBuddy',
+    appTitle: 'AT&T Tech Support',
     tagline: 'De l\'aide amicale pour tout souci informatique.',
     modeChat: 'Discussion',
     modeShowMe: 'Montre-moi',
@@ -126,7 +126,7 @@ const dict = {
     highContrast: 'Contraste élevé',
     language: 'Langue',
     footer: 'Fait pour être patient. Ne demande jamais de mots de passe.',
-    typing: 'TechBuddy écrit…',
+    typing: 'AT&T Tech Support écrit…',
     error: 'Une erreur est survenue. Réessayez.',
     healthGood: 'Très bien',
     healthOk: 'Tout va bien',
@@ -135,7 +135,7 @@ const dict = {
     topTip: 'Meilleur conseil',
   },
   de: {
-    appTitle: 'TechBuddy',
+    appTitle: 'AT&T Tech Support',
     tagline: 'Freundliche Hilfe bei jedem Computerproblem.',
     modeChat: 'Chat',
     modeShowMe: 'Zeig es mir',
@@ -168,7 +168,7 @@ const dict = {
     highContrast: 'Hoher Kontrast',
     language: 'Sprache',
     footer: 'Geduldig gemacht. Fragt nie nach Passwörtern.',
-    typing: 'TechBuddy schreibt…',
+    typing: 'AT&T Tech Support schreibt…',
     error: 'Etwas ist schiefgelaufen. Bitte erneut versuchen.',
     healthGood: 'Sieht super aus',
     healthOk: 'Alles gut',
@@ -177,7 +177,7 @@ const dict = {
     topTip: 'Top-Tipp',
   },
   pt: {
-    appTitle: 'TechBuddy',
+    appTitle: 'AT&T Tech Support',
     tagline: 'Ajuda gentil para qualquer problema no computador.',
     modeChat: 'Conversar',
     modeShowMe: 'Me mostre',
@@ -210,7 +210,7 @@ const dict = {
     highContrast: 'Alto contraste',
     language: 'Idioma',
     footer: 'Feito com paciência. Nunca pede senhas.',
-    typing: 'TechBuddy está digitando…',
+    typing: 'AT&T Tech Support está digitando…',
     error: 'Algo deu errado. Tente de novo.',
     healthGood: 'Está ótimo',
     healthOk: 'Tudo bem',
@@ -219,7 +219,7 @@ const dict = {
     topTip: 'Melhor dica',
   },
   sk: {
-    appTitle: 'TechBuddy',
+    appTitle: 'AT&T Tech Support',
     tagline: 'Priateľská pomoc pri akomkoľvek probléme s počítačom.',
     modeChat: 'Konverzácia',
     modeShowMe: 'Ukáž mi',

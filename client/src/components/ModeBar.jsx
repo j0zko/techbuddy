@@ -17,7 +17,6 @@ export default function ModeBar({ mode, onChange, lang }) {
           className={`mode-tab ${mode === m.key ? 'active' : ''}`}
           onClick={() => onChange(m.key)}
         >
-          <span aria-hidden="true" className="mode-icon">{m.icon}</span>
           <span>{t(lang, m.labelKey)}</span>
         </button>
       ))}

@@ -31,26 +31,28 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <div className="brand">
-          <span aria-hidden="true" className="logo">🤝</span>
-          <div>
-            <h1>{t(lang, 'appTitle')}</h1>
-            <p className="tagline">{t(lang, 'tagline')}</p>
+        <div className="header-center">
+          <div className="brand">
+            <div>
+              <h1>{t(lang, 'appTitle')}</h1>
+              <p className="tagline">{t(lang, 'tagline')}</p>
+            </div>
+          </div>
+          <div className="mode-bar-wrapper">
+            <ModeBar mode={mode} onChange={setMode} lang={lang} />
+          </div>
+          <div className="header-controls">
+            <LanguagePicker lang={lang} onChange={setLang} />
+            <AccessibilityPanel
+              largeText={largeText}
+              highContrast={highContrast}
+              onToggleLargeText={() => setLargeText((v) => !v)}
+              onToggleHighContrast={() => setHighContrast((v) => !v)}
+              lang={lang}
+            />
           </div>
         </div>
-        <div className="header-controls">
-          <LanguagePicker lang={lang} onChange={setLang} />
-          <AccessibilityPanel
-            largeText={largeText}
-            highContrast={highContrast}
-            onToggleLargeText={() => setLargeText((v) => !v)}
-            onToggleHighContrast={() => setHighContrast((v) => !v)}
-            lang={lang}
-          />
-        </div>
       </header>
-
-      <ModeBar mode={mode} onChange={setMode} lang={lang} />
 
       <main className="app-main">
         {mode === 'chat' && <ChatMode lang={lang} />}
