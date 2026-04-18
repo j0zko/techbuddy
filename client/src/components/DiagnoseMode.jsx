@@ -11,30 +11,34 @@ const HEALTH_KEY = {
   serious: 'healthSerious',
 };
 
-export default function DiagnoseMode({ lang }) {
-  const [stage, setStage] = useState('idle'); // idle | scanning | thinking | done
-  const [hardware, setHardware] = useState(null);
-  const [report, setReport] = useState(null);
+export default function DiagnoseMode({ lang, conversation, onUpdate }) {
+  const report = conversation?.data ?? null;
+  const hardware = conversation?.meta?.hardware ?? null;
+  const [stage, setStage] = useState(report ? 'done' : 'idle'); // idle | scanning | thinking | done
   const [error, setError] = useState(null);
 
   async function run() {
     setStage('scanning');
     setError(null);
-    setReport(null);
     try {
       const hw = await fetchHardware();
-      setHardware(hw);
       setStage('thinking');
       const { data } = await sendChat({
         messages: [],
         mode: 'diagnose',
         hardwareData: hw,
       });
-      setReport(data);
+      const d = new Date();
+      onUpdate({
+        messages: [],
+        data,
+        meta: { hardware: hw },
+        title: `${t(lang, 'modeDiagnose')} · ${d.toLocaleDateString(lang)} ${d.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' })}`,
+      });
       setStage('done');
     } catch (e) {
       setError(e.message || t(lang, 'error'));
-      setStage('idle');
+      setStage(report ? 'done' : 'idle');
     }
   }
 

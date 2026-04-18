@@ -34,6 +34,15 @@ const showMeSchema = {
   required: ["title", "intro", "steps", "done_message", "escalate"],
 };
 
+const chatSchema = {
+  type: "object",
+  properties: {
+    reply: { type: "string" },
+    escalate: { type: "boolean" },
+  },
+  required: ["reply", "escalate"],
+};
+
 const diagnoseSchema = {
   type: "object",
   properties: {
@@ -109,7 +118,9 @@ router.post("/", async (req, res, next) => {
         generationConfig: {
           temperature: 0.3,
           topP: 0.8,
-          maxOutputTokens: 200,
+          responseMimeType: "application/json",
+          responseSchema: chatSchema,
+          maxOutputTokens: 400,
           thinkingConfig: { thinkingBudget: 0 },
         },
       });
@@ -117,8 +128,19 @@ router.post("/", async (req, res, next) => {
       const history = toGeminiHistory(cleanMessages);
       const result = await model.generateContent({ contents: history });
 
-      const reply = result.response.text();
-      return res.json({ mode, reply });
+      const text = result.response.text();
+      const parsed = tryParseJson(text);
+
+      if (!parsed || typeof parsed.reply !== "string") {
+        return res
+          .status(502)
+          .json({ error: "Could not parse Chat response", raw: text });
+      }
+      return res.json({
+        mode,
+        reply: parsed.reply,
+        escalate: Boolean(parsed.escalate),
+      });
     }
 
     if (mode === "showme") {

@@ -4,8 +4,15 @@ import { t } from '../i18n/index.js';
 import { useSpeech, SPEECH_LANG_MAP } from '../hooks/useSpeech.js';
 import EscalationCard from './EscalationCard.jsx';
 
-export default function ChatMode({ lang }) {
-  const [messages, setMessages] = useState([]);
+function deriveTitle(messages) {
+  const firstUser = messages.find((m) => m.role === 'user');
+  if (!firstUser) return 'Untitled';
+  const text = firstUser.content.trim().replace(/\s+/g, ' ');
+  return text.length > 40 ? `${text.slice(0, 40)}…` : text;
+}
+
+export default function ChatMode({ lang, conversation, onUpdate }) {
+  const messages = conversation?.messages ?? [];
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -26,13 +33,17 @@ export default function ChatMode({ lang }) {
     const trimmed = (text ?? input).trim();
     if (!trimmed || busy) return;
     const next = [...messages, { role: 'user', content: trimmed }];
-    setMessages(next);
+    onUpdate({ messages: next, title: deriveTitle(next) });
     setInput('');
     setBusy(true);
     setError(null);
     try {
-      const { reply } = await sendChat({ messages: next, mode: 'chat' });
-      setMessages([...next, { role: 'assistant', content: reply }]);
+      const { reply, escalate } = await sendChat({ messages: next, mode: 'chat' });
+      const final = [
+        ...next,
+        { role: 'assistant', content: reply, escalate: Boolean(escalate) },
+      ];
+      onUpdate({ messages: final, title: deriveTitle(final) });
     } catch (e) {
       setError(e.message || t(lang, 'error'));
     } finally {
@@ -49,11 +60,10 @@ export default function ChatMode({ lang }) {
 
   const escalateSummary = (() => {
     const last = [...messages].reverse().find((m) => m.role === 'assistant');
-    if (!last) return null;
-    const triggers = /(repair shop|technician|professional|store|hardware|may need help|seek help|servisn|servicio técnico|atelier|werkstatt|assist[êe]ncia|technicien)/i;
-    return triggers.test(last.content)
-      ? messages.map((m) => `${m.role === 'user' ? 'Me' : 'TechBuddy'}: ${m.content}`).join('\n\n')
-      : null;
+    if (!last || !last.escalate) return null;
+    return messages
+      .map((m) => `${m.role === 'user' ? 'Me' : 'TechBuddy'}: ${m.content}`)
+      .join('\n\n');
   })();
 
   return (

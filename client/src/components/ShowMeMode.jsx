@@ -3,10 +3,11 @@ import { sendChat } from '../api.js';
 import { t } from '../i18n/index.js';
 import EscalationCard from './EscalationCard.jsx';
 
-export default function ShowMeMode({ lang }) {
-  const [topic, setTopic] = useState('');
+export default function ShowMeMode({ lang, conversation, onUpdate }) {
+  const data = conversation?.data ?? null;
+  const savedTopic = conversation?.meta?.topic ?? '';
+  const [topic, setTopic] = useState(savedTopic);
   const [busy, setBusy] = useState(false);
-  const [data, setData] = useState(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [error, setError] = useState(null);
 
@@ -14,7 +15,6 @@ export default function ShowMeMode({ lang }) {
     const trimmed = topic.trim();
     if (!trimmed || busy) return;
     setBusy(true);
-    setData(null);
     setError(null);
     setStepIndex(0);
     try {
@@ -22,12 +22,23 @@ export default function ShowMeMode({ lang }) {
         messages: [{ role: 'user', content: trimmed }],
         mode: 'showme',
       });
-      setData(result);
+      onUpdate({
+        messages: [{ role: 'user', content: trimmed }],
+        data: result,
+        meta: { topic: trimmed },
+        title: result?.title || trimmed.slice(0, 40),
+      });
     } catch (e) {
       setError(e.message || t(lang, 'error'));
     } finally {
       setBusy(false);
     }
+  }
+
+  function reset() {
+    onUpdate({ data: null, meta: { topic: '' }, messages: [] });
+    setTopic('');
+    setStepIndex(0);
   }
 
   if (!data) {
@@ -94,7 +105,7 @@ export default function ShowMeMode({ lang }) {
           ) : (
             <button
               className="btn-primary"
-              onClick={() => { setData(null); setTopic(''); }}
+              onClick={reset}
             >
               ✓ {t(lang, 'finish')}
             </button>

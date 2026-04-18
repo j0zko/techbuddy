@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import ModeBar from './components/ModeBar.jsx';
 import ChatMode from './components/ChatMode.jsx';
 import ShowMeMode from './components/ShowMeMode.jsx';
 import DiagnoseMode from './components/DiagnoseMode.jsx';
 import AccessibilityPanel from './components/AccessibilityPanel.jsx';
 import LanguagePicker from './components/LanguagePicker.jsx';
+import HistorySidebar from './components/HistorySidebar.jsx';
+import { useHistory } from './hooks/useHistory.js';
 import { t } from './i18n/index.js';
 
 const MODE_META = {
@@ -19,6 +21,17 @@ export default function App() {
   const [largeText, setLargeText] = useState(() => localStorage.getItem('tb-large') === '1');
   const [highContrast, setHighContrast] = useState(() => localStorage.getItem('tb-contrast') === '1');
   const [navOpen, setNavOpen] = useState(false);
+
+  const {
+    conversations,
+    activeId,
+    active,
+    setActiveId,
+    clearActive,
+    upsertActive,
+    deleteConversation,
+    clearAll,
+  } = useHistory();
 
   useEffect(() => {
     document.documentElement.classList.toggle('large-text', largeText);
@@ -35,6 +48,29 @@ export default function App() {
     document.documentElement.lang = lang;
   }, [lang]);
 
+  const conversation = active && active.mode === mode ? active : null;
+
+  const onSelectMode = useCallback((m) => {
+    setMode(m);
+    clearActive();
+    setNavOpen(false);
+  }, [clearActive]);
+
+  const onSelectConversation = useCallback((conv) => {
+    setMode(conv.mode);
+    setActiveId(conv.id);
+    setNavOpen(false);
+  }, [setActiveId]);
+
+  const onNewConversation = useCallback(() => {
+    clearActive();
+    setNavOpen(false);
+  }, [clearActive]);
+
+  const updateConversation = useCallback((patch) => {
+    upsertActive(mode, patch);
+  }, [upsertActive, mode]);
+
   const meta = MODE_META[mode];
 
   return (
@@ -48,7 +84,17 @@ export default function App() {
           </div>
         </div>
 
-        <ModeBar mode={mode} onChange={(m) => { setMode(m); setNavOpen(false); }} lang={lang} />
+        <ModeBar mode={mode} onChange={onSelectMode} lang={lang} />
+
+        <HistorySidebar
+          conversations={conversations}
+          activeId={activeId}
+          onSelect={onSelectConversation}
+          onNew={onNewConversation}
+          onDelete={deleteConversation}
+          onClearAll={clearAll}
+          lang={lang}
+        />
 
         <div className="sidebar-footer">
           <LanguagePicker lang={lang} onChange={setLang} />
@@ -81,9 +127,30 @@ export default function App() {
         </header>
 
         <main className="content-main">
-          {mode === 'chat' && <ChatMode lang={lang} />}
-          {mode === 'showme' && <ShowMeMode lang={lang} />}
-          {mode === 'diagnose' && <DiagnoseMode lang={lang} />}
+          {mode === 'chat' && (
+            <ChatMode
+              key={conversation?.id || 'new'}
+              lang={lang}
+              conversation={conversation}
+              onUpdate={updateConversation}
+            />
+          )}
+          {mode === 'showme' && (
+            <ShowMeMode
+              key={conversation?.id || 'new'}
+              lang={lang}
+              conversation={conversation}
+              onUpdate={updateConversation}
+            />
+          )}
+          {mode === 'diagnose' && (
+            <DiagnoseMode
+              key={conversation?.id || 'new'}
+              lang={lang}
+              conversation={conversation}
+              onUpdate={updateConversation}
+            />
+          )}
         </main>
       </div>
     </div>
