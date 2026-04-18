@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from "react";
 
 const SpeechRecognition =
-  typeof window !== 'undefined'
-    ? window['SpeechRecognition'] || window['webkitSpeechRecognition']
+  typeof window !== "undefined"
+    ? window["SpeechRecognition"] || window["webkitSpeechRecognition"]
     : null;
 
-export function useSpeech({ lang = 'en-US', onResult } = {}) {
+export function useSpeech({ lang = "en-US", onResult } = {}) {
   const [listening, setListening] = useState(false);
   const [error, setError] = useState(null);
   const recognitionRef = useRef(null);
@@ -21,19 +21,23 @@ export function useSpeech({ lang = 'en-US', onResult } = {}) {
     recognition.onresult = (event) => {
       const transcript = Array.from(event.results)
         .map((r) => r[0].transcript)
-        .join(' ')
+        .join(" ")
         .trim();
       if (transcript && onResult) onResult(transcript);
     };
     recognition.onerror = (event) => {
-      setError(event.error || 'speech-error');
+      setError(event.error || "speech-error");
       setListening(false);
     };
     recognition.onend = () => setListening(false);
 
     recognitionRef.current = recognition;
     return () => {
-      try { recognition.abort(); } catch { /* noop */ }
+      try {
+        recognition.abort();
+      } catch {
+        /* noop */
+      }
     };
   }, [lang, onResult, supported]);
 
@@ -50,7 +54,11 @@ export function useSpeech({ lang = 'en-US', onResult } = {}) {
 
   const stopListening = useCallback(() => {
     if (!recognitionRef.current) return;
-    try { recognitionRef.current.stop(); } catch { /* noop */ }
+    try {
+      recognitionRef.current.stop();
+    } catch {
+      /* noop */
+    }
     setListening(false);
   }, []);
 
@@ -58,10 +66,11 @@ export function useSpeech({ lang = 'en-US', onResult } = {}) {
 }
 
 export const SPEECH_LANG_MAP = {
-  en: 'en-US',
-  es: 'es-ES',
-  fr: 'fr-FR',
-  de: 'de-DE',
-  pt: 'pt-PT',
-  sk: 'sk-SK',
+  en: "en-US",
+  es: "es-ES",
+  fr: "fr-FR",
+  de: "de-DE",
+  pt: "pt-PT",
+  sk: "sk-SK",
+  cz: "cz-CZ",
 };
