@@ -107,7 +107,9 @@ router.post("/", async (req, res, next) => {
         model: MODEL,
         systemInstruction: chatSystemPrompt,
         generationConfig: {
-          maxOutputTokens: 1024,
+          temperature: 0.3,
+          topP: 0.8,
+          maxOutputTokens: 120,
         },
       });
 
@@ -123,6 +125,8 @@ router.post("/", async (req, res, next) => {
         model: MODEL,
         systemInstruction: showMeSystemPrompt,
         generationConfig: {
+          temperature: 0.3,
+          topP: 0.8,
           responseMimeType: "application/json",
           responseSchema: showMeSchema,
           maxOutputTokens: 2048,
@@ -148,6 +152,8 @@ router.post("/", async (req, res, next) => {
         model: MODEL,
         systemInstruction: diagnoseSystemPrompt,
         generationConfig: {
+          temperature: 0.3,
+          topP: 0.8,
           responseMimeType: "application/json",
           responseSchema: diagnoseSchema,
           maxOutputTokens: 2048,
