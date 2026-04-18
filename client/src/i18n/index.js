@@ -49,6 +49,9 @@ const dict = {
     healthAttention: 'Worth a look',
     healthSerious: 'Needs attention',
     topTip: 'Top tip',
+    chatSubtitle: 'Ask a question and get friendly, step-by-step help.',
+    showMeSubtitle: 'Tell us what you want to do — we will walk you through it.',
+    diagnoseSubtitle: 'A quick automatic check of your computer health.',
   },
   es: {
     appTitle: 'AT&T Tech Support',

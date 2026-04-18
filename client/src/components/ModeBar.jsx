@@ -8,7 +8,7 @@ const MODES = [
 
 export default function ModeBar({ mode, onChange, lang }) {
   return (
-    <div className="mode-bar" role="tablist" aria-label="Mode">
+    <nav className="mode-bar" role="tablist" aria-label="Mode">
       {MODES.map((m) => (
         <button
           key={m.key}
@@ -17,9 +17,10 @@ export default function ModeBar({ mode, onChange, lang }) {
           className={`mode-tab ${mode === m.key ? 'active' : ''}`}
           onClick={() => onChange(m.key)}
         >
-          <span>{t(lang, m.labelKey)}</span>
+          <span className="mode-icon" aria-hidden="true">{m.icon}</span>
+          <span className="mode-label">{t(lang, m.labelKey)}</span>
         </button>
       ))}
-    </div>
+    </nav>
   );
 }
