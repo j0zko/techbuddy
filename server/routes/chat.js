@@ -26,14 +26,12 @@ const showMeSchema = {
           body: { type: "string" },
         },
         required: ["title", "body"],
-        additionalProperties: false,
       },
     },
     done_message: { type: "string" },
     escalate: { type: "boolean" },
   },
   required: ["title", "intro", "steps", "done_message", "escalate"],
-  additionalProperties: false,
 };
 
 const diagnoseSchema = {
@@ -54,14 +52,12 @@ const diagnoseSchema = {
           message: { type: "string" },
         },
         required: ["area", "status", "message"],
-        additionalProperties: false,
       },
     },
     top_tip: { type: "string" },
     escalate: { type: "boolean" },
   },
   required: ["overall_health", "summary", "findings", "top_tip", "escalate"],
-  additionalProperties: false,
 };
 
 function tryParseJson(text) {
